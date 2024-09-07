@@ -1,13 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <!-- Target macOS ARM64 and .NET 8 -->
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
+
+    <!-- Remove Windows-specific properties -->
+    <OutputType>Exe</OutputType>
     <RollForward>Major</RollForward>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
-    <UseWindowsForms>True</UseWindowsForms>
-    <Platforms>AnyCPU;x86;x64</Platforms>
+
+    <!-- Platform target updated to include ARM64 -->
+    <Platforms>AnyCPU;arm64;x64</Platforms>
   </PropertyGroup>
+
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
@@ -18,39 +24,43 @@
     <AssemblyVersion>$(ProductVersion)</AssemblyVersion>
     <FileVersion>1.0.3</FileVersion>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugType>portable</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm64'">
     <DebugType>portable</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm64'">
     <DebugType>none</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
+
   <ItemGroup>
-    <None Remove="Content\TrackerFont.ttf" />
-    <None Remove="Source\UI\WaveEditor.cs~RFd26000b.TMP" />
+    <None Remove="Content/TrackerFont.ttf" />
+    <None Remove="Source/UI/WaveEditor.cs~RFd26000b.TMP" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
+    <!-- Update MonoGame references to target cross-platform frameworks -->
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.1.303" />
     <PackageReference Include="NAudio" Version="2.1.0" />
     <PackageReference Include="protobuf-net" Version="3.2.26" />
   </ItemGroup>
+
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />
     <Exec Command="dotnet tool restore" />
   </Target>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="(if exist &quot;$(TargetDir)*old.pdb&quot; del &quot;$(TargetDir)*old.pdb&quot;) &amp; (if exist &quot;$(TargetDir)*.pdb&quot; ren &quot;$(TargetDir)*.pdb&quot; *.old.pdb)&#xD;&#xA;" />
+    <Exec Command="if [ -f &quot;$(TargetDir)*old.pdb&quot; ]; then rm &quot;$(TargetDir)*old.pdb&quot;; fi" />
+    <Exec Command="if [ -f &quot;$(TargetDir)*.pdb&quot; ]; then mv &quot;$(TargetDir)*.pdb&quot; *.old.pdb; fi" />
   </Target>
 </Project>

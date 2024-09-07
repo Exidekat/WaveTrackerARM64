@@ -1,79 +1,91 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;  // This is needed for EventHandler
 using Avalonia.Controls;
-using Avalonia.Media;
+using Avalonia.Interactivity;
+using Microsoft.Xna.Framework;
 
-namespace WaveTracker.UI {
-    public class Button : Clickable {
+namespace WaveTracker.UI
+{
+    public class Button : Clickable
+    {
+        private Avalonia.Controls.Button avaloniaButton;
         public string Label { get; private set; }
         public bool LabelIsCentered { get; set; }
-
         private ButtonColors colors;
         private int labelWidth;
 
-        public Button(string label, int x, int y, Element parent) {
-            enabled = true;
-            this.x = x;
-            this.y = y;
-            Label = label;
-            colors = ButtonColors.Round;
-            LabelIsCentered = true;
-            width = Helpers.GetWidthOfText(label) + 8;
-            labelWidth = Helpers.GetWidthOfText(label);
-            height = 13;
-            SetParent(parent);
-        }
-        public Button(string label, int x, int y, int width, Element parent) {
-            enabled = true;
-            this.x = x;
-            this.y = y;
-            Label = label;
-            colors = ButtonColors.Round;
-            LabelIsCentered = true;
-            this.width = width;
-            labelWidth = Helpers.GetWidthOfText(label);
-            height = 13;
-            SetParent(parent);
+        public Button()
+        {
+            // Create an internal Avalonia Button
+            avaloniaButton = new Avalonia.Controls.Button();
+            avaloniaButton.Click += OnAvaloniaButtonClick;
         }
 
-        public void SetLabel(string label) {
+        public Button(string label, int x, int y, Element parent)
+        {
             Label = label;
+            this.x = x;
+            this.y = y;
+            LabelIsCentered = true;
+            colors = ButtonColors.Round;
+            SetParent(parent);
+
+            avaloniaButton = new Avalonia.Controls.Button
+            {
+                Content = Label
+            };
+            avaloniaButton.Click += OnAvaloniaButtonClick;
+        }
+
+        private void OnAvaloniaButtonClick(object sender, RoutedEventArgs e) // Removed nullable annotation
+        {
+            // This will handle the Click event in the in-code usage
+            OnClick();
+        }
+
+        public event EventHandler<RoutedEventArgs> Click
+        {
+            add => avaloniaButton.Click += value;
+            remove => avaloniaButton.Click -= value;
+        }
+
+        public void SetLabel(string label)
+        {
+            Label = label;
+            avaloniaButton.Content = label;
             labelWidth = Helpers.GetWidthOfText(label);
         }
 
-        private Microsoft.Xna.Framework.Color GetBackgroundColor() {
+        public object Content
+        {
+            get => avaloniaButton.Content;
+            set => avaloniaButton.Content = value;
+        }
+
+        public void Draw()
+        {
+            // Here you can retain your original drawing logic if needed
+            // or integrate Avalonia's rendering engine.
+            avaloniaButton.Background = GetBackgroundColor().ToAvaloniaBrush();
+            avaloniaButton.BorderBrush = GetBorderColor().ToAvaloniaBrush();
+        }
+
+        private Color GetBackgroundColor()
+        {
             return IsPressed ? colors.backgroundColorPressed : IsHovered ? colors.backgroundColorHover : colors.backgroundColor;
         }
 
-        private Microsoft.Xna.Framework.Color GetTextColor() {
-            return IsPressed ? colors.textColorPressed : colors.textColor;
-        }
-
-        private Microsoft.Xna.Framework.Color GetBorderColor() {
+        private Color GetBorderColor()
+        {
             return IsPressed ? colors.borderColorPressed : colors.borderColor;
         }
+    }
 
-        public void Draw() {
-            if (enabled) {
-                DrawRoundedRect(0, 0, width, height, GetBackgroundColor());
-
-                int textOffset = IsPressed ? 1 : 0;
-
-                if (LabelIsCentered) {
-                    Write(Label, (width - labelWidth) / 2, (height + 1) / 2 - 4 + textOffset, GetTextColor());
-                }
-                else {
-                    Write(Label, 4, (height + 1) / 2 - 4 + textOffset, GetTextColor());
-                }
-            }
-            else {
-                DrawRoundedRect(0, 0, width, height, colors.backgroundColorDisabled);
-                if (LabelIsCentered) {
-                    Write(Label, (width - labelWidth) / 2, (height + 1) / 2 - 4, colors.textColorDisabled);
-                }
-                else {
-                    Write(Label, 4, (height + 1) / 2 - 4, colors.textColorDisabled);
-                }
-            }
+    public static class ColorExtensions
+    {
+        // Convert XNA Color to Avalonia Brush
+        public static Avalonia.Media.IBrush ToAvaloniaBrush(this Microsoft.Xna.Framework.Color color)
+        {
+            return new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(color.A, color.R, color.G, color.B));
         }
     }
 }

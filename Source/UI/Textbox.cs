@@ -1,9 +1,12 @@
-﻿using Microsoft.Xna.Framework;
-using System.Windows.Forms;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Media;
+using System;
 
 namespace WaveTracker.UI {
-    public class Textbox : Clickable {
-        private Forms.EnterText dialog;
+    public class Textbox : UserControl {
+        private Window dialog;
         public bool canEdit = true;
         private string label;
         private string textPrefix = "";
@@ -14,26 +17,27 @@ namespace WaveTracker.UI {
 
         private string lastText;
         public int MaxLength { get; set; }
-        public Textbox(string label, int x, int y, int width, int textBoxWidth, Element parent) {
-            this.width = width;
-            textboxWidth = textBoxWidth;
-            this.x = x;
-            this.y = y;
+
+        public Textbox(string label, int x, int y, int width, int textBoxWidth) {
             this.label = label;
-            height = 13;
+            this.Margin = new Thickness(x, y, 0, 0);
+            this.Width = width;
+            textboxWidth = textBoxWidth;
+            Height = 30;
             MaxLength = 32;
-            SetParent(parent);
+
+            this.Text = string.Empty;
         }
 
-        public Textbox(string label, int x, int y, int width, Element parent) {
-            this.width = width;
-            textboxWidth = label == "" ? width : width - Helpers.GetWidthOfText(label) - 4;
-            this.x = x;
-            this.y = y;
+        public Textbox(string label, int x, int y, int width) {
             this.label = label;
-            height = 13;
+            this.Margin = new Thickness(x, y, 0, 0);
+            this.Width = width;
+            textboxWidth = label == "" ? width : width - Helpers.GetWidthOfText(label) - 4;
+            Height = 30;
             MaxLength = 32;
-            SetParent(parent);
+
+            this.Text = string.Empty;
         }
 
         public void SetPrefix(string prefix) {
@@ -41,15 +45,10 @@ namespace WaveTracker.UI {
         }
 
         public void Update() {
-            if (enabled) {
+            if (canEdit) {
                 ValueWasChangedInternally = false;
-                if (Clicked && canEdit) {
-                    if (Input.dialogOpenCooldown == 0) {
-                        StartDialog();
-                    }
-                }
 
-                if (Text != lastText) {
+                if (ValueWasChanged || !string.Equals(Text, lastText, StringComparison.Ordinal)) {
                     ValueWasChanged = true;
                     lastText = Text;
                 }
@@ -59,38 +58,62 @@ namespace WaveTracker.UI {
             }
         }
 
-        public void Draw() {
-            Color dark = UIColors.labelDark;
-            Color text = UIColors.black;
-            if (IsHovered && canEdit && enabled) {
-                dark = text;
-            }
-            Write(label + "", 0, height / 2 - 3, dark);
-            DrawRect(width - textboxWidth, 0, textboxWidth, height, dark);
-            DrawRect(width - textboxWidth + 1, 1, textboxWidth - 2, height - 2, Color.White);
-            if (canEdit) {
-                DrawRect(width - textboxWidth + 1, 1, textboxWidth - 2, 1, new Color(193, 196, 213));
-            }
+        public void StartDialog() {
+            if (dialog != null) return;
 
-            string t = textPrefix + Text + "";
-            if (t.Length > 0) {
-                Write(Helpers.TrimTextToWidth(textboxWidth, t), width - textboxWidth + 4, height / 2 - 3, text);
-            }
-            else {
-                Write(Helpers.TrimTextToWidth(textboxWidth, t), width - textboxWidth + 4, height / 2 - 3, text);
-            }
+            dialog = new Window {
+                Width = 300,
+                Height = 150,
+                Title = "Edit Text"
+            };
+
+            var textBox = new TextBox { Text = Text, MaxLength = MaxLength, Margin = new Thickness(10) };
+            var okButton = new Button { Content = "OK", Width = 100, Margin = new Thickness(10) };
+            okButton.Click += (s, e) => {
+                Text = textBox.Text;
+                ValueWasChangedInternally = true;
+                dialog.Close();
+                dialog = null;
+            };
+
+            var stackPanel = new StackPanel { Orientation = Orientation.Vertical };
+            stackPanel.Children.Add(textBox);
+            stackPanel.Children.Add(okButton);
+            dialog.Content = stackPanel;
+
+            dialog.ShowDialog(App.MainWindow);
         }
 
-        public void StartDialog() {
-            Input.DialogStarted();
-            dialog = new Forms.EnterText();
-            dialog.textBox.Text = Text;
-            dialog.label.Text = label;
-            dialog.textBox.MaxLength = MaxLength;
-            if (dialog.ShowDialog() == DialogResult.OK) {
-                Text = Helpers.FlushString(dialog.textBox.Text);
-                ValueWasChangedInternally = true;
-            }
+        public override void Render(DrawingContext context) {
+            base.Render(context);
+
+            var darkBrush = new SolidColorBrush(Colors.DarkGray);
+            var textBrush = new SolidColorBrush(Colors.Black);
+            var backgroundBrush = new SolidColorBrush(Colors.White);
+
+            var textBoxRect = new Rect(Bounds.Width - textboxWidth, 0, textboxWidth, Bounds.Height);
+
+            // Draw Label
+            var formattedLabel = new FormattedText {
+                Text = label,
+                Typeface = new Typeface("Arial"),
+                FontSize = 12
+            };
+            context.DrawText(textBrush, new Point(0, Bounds.Height / 2 - formattedLabel.Bounds.Height / 2), formattedLabel);
+
+            // Draw Textbox
+            context.DrawRectangle(darkBrush, new Pen(Brushes.Gray, 1), textBoxRect);
+            context.DrawRectangle(backgroundBrush, null, new Rect(textBoxRect.X + 1, textBoxRect.Y + 1, textBoxRect.Width - 2, textBoxRect.Height - 2));
+
+            // Display text inside the textbox
+            var displayText = textPrefix + Text;
+            var formattedText = new FormattedText {
+                Text = displayText.Length > MaxLength ? displayText.Substring(0, MaxLength) : displayText,
+                Typeface = new Typeface("Arial"),
+                FontSize = 12
+            };
+            var textPosition = new Point(textBoxRect.Left + 4, Bounds.Height / 2 - formattedText.Bounds.Height / 2);
+            context.DrawText(textBrush, textPosition, formattedText);
         }
     }
 }

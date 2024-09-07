@@ -4,8 +4,10 @@ using Avalonia.Input;
 using Avalonia.Media;
 using System;
 
-namespace WaveTracker.UI {
-    public class Textbox : UserControl {
+namespace WaveTracker.UI
+{
+    public class Textbox : UserControl
+    {
         private Window dialog;
         public bool canEdit = true;
         private string label;
@@ -18,7 +20,8 @@ namespace WaveTracker.UI {
         private string lastText;
         public int MaxLength { get; set; }
 
-        public Textbox(string label, int x, int y, int width, int textBoxWidth) {
+        public Textbox(string label, int x, int y, int width, int textBoxWidth)
+        {
             this.label = label;
             this.Margin = new Thickness(x, y, 0, 0);
             this.Width = width;
@@ -29,7 +32,8 @@ namespace WaveTracker.UI {
             this.Text = string.Empty;
         }
 
-        public Textbox(string label, int x, int y, int width) {
+        public Textbox(string label, int x, int y, int width)
+        {
             this.label = label;
             this.Margin = new Thickness(x, y, 0, 0);
             this.Width = width;
@@ -40,36 +44,46 @@ namespace WaveTracker.UI {
             this.Text = string.Empty;
         }
 
-        public void SetPrefix(string prefix) {
+        public void SetPrefix(string prefix)
+        {
             textPrefix = prefix;
         }
 
-        public void Update() {
-            if (canEdit) {
+        public void Update()
+        {
+            if (canEdit)
+            {
                 ValueWasChangedInternally = false;
 
-                if (ValueWasChanged || !string.Equals(Text, lastText, StringComparison.Ordinal)) {
+                if (ValueWasChanged || !string.Equals(Text, lastText, StringComparison.Ordinal))
+                {
                     ValueWasChanged = true;
                     lastText = Text;
                 }
-                else {
+                else
+                {
                     ValueWasChanged = false;
                 }
             }
         }
 
-        public void StartDialog() {
+        public void StartDialog()
+        {
             if (dialog != null) return;
 
-            dialog = new Window {
+            dialog = new Window
+            {
                 Width = 300,
                 Height = 150,
                 Title = "Edit Text"
             };
 
             var textBox = new TextBox { Text = Text, MaxLength = MaxLength, Margin = new Thickness(10) };
-            var okButton = new Button { Content = "OK", Width = 100, Margin = new Thickness(10) };
-            okButton.Click += (s, e) => {
+
+            // Initialize the 'okButton' with the required constructor arguments
+            var okButton = new Button("OK", 10, 10, 100); // Example of x=10, y=10, width=100
+            okButton.Click += (s, e) =>
+            {
                 Text = textBox.Text;
                 ValueWasChangedInternally = true;
                 dialog.Close();
@@ -84,7 +98,8 @@ namespace WaveTracker.UI {
             dialog.ShowDialog(App.MainWindow);
         }
 
-        public override void Render(DrawingContext context) {
+        public override void Render(DrawingContext context)
+        {
             base.Render(context);
 
             var darkBrush = new SolidColorBrush(Colors.DarkGray);
@@ -94,7 +109,8 @@ namespace WaveTracker.UI {
             var textBoxRect = new Rect(Bounds.Width - textboxWidth, 0, textboxWidth, Bounds.Height);
 
             // Draw Label
-            var formattedLabel = new FormattedText {
+            var formattedLabel = new FormattedText
+            {
                 Text = label,
                 Typeface = new Typeface("Arial"),
                 FontSize = 12
@@ -107,7 +123,8 @@ namespace WaveTracker.UI {
 
             // Display text inside the textbox
             var displayText = textPrefix + Text;
-            var formattedText = new FormattedText {
+            var formattedText = new FormattedText
+            {
                 Text = displayText.Length > MaxLength ? displayText.Substring(0, MaxLength) : displayText,
                 Typeface = new Typeface("Arial"),
                 FontSize = 12

@@ -45,10 +45,11 @@ namespace WaveTracker.UI {
             Height = 30;
             canScroll = true;
 
-            bUp = new Button { Content = "▲", Width = 20, Height = 20, Margin = new Thickness(0, 0, 0, 10) };
+            // Updated Button instantiations with the required label and other parameters
+            bUp = new Button("▲", x, y, 20);
             bUp.Click += (s, e) => Value++;
 
-            bDown = new Button { Content = "▼", Width = 20, Height = 20 };
+            bDown = new Button("▼", x, y + 30, 20);
             bDown.Click += (s, e) => Value--;
 
             var panel = new StackPanel { Orientation = Orientation.Horizontal };
@@ -100,7 +101,8 @@ namespace WaveTracker.UI {
                 };
 
                 var textBox = new TextBox { Text = Value.ToString(), Margin = new Thickness(10) };
-                var okButton = new Button { Content = "OK", Width = 100, Margin = new Thickness(10) };
+
+                var okButton = new Button("OK", 10, 10, 100); // Updated Button instantiation
                 okButton.Click += (s, e) => {
                     if (float.TryParse(textBox.Text, out float result)) {
                         Value = result;

@@ -3,8 +3,11 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using WaveTracker.Tracker;
 
-namespace WaveTracker.UI {
-    public class InstrumentBank : UserControl {
+
+namespace WaveTracker.UI
+{
+    public class InstrumentBank : UserControl
+    {
         private Forms.EnterText renameDialog;
         private bool dialogOpen;
         private int lastIndex;
@@ -12,6 +15,8 @@ namespace WaveTracker.UI {
         public ScrollViewer scrollbar;
 
         public int CurrentInstrumentIndex { get; set; }
+
+        // Assuming `Instrument` is part of your project; if not, replace this with the correct type
         public Instrument GetCurrentInstrument {
             get {
                 return App.CurrentModule.Instruments[CurrentInstrumentIndex];
@@ -22,37 +27,41 @@ namespace WaveTracker.UI {
         public Button bEdit;
         public Menu menu;
 
-        public InstrumentBank() {
+        public InstrumentBank()
+        {
             // Set up buttons, scrollbar, and other UI elements
-            bNewWave = new Button { Content = "New Wave" };
+            bNewWave = new Button("New Wave", 0, 0, 100);  // Assuming default x, y, and width values
             bNewWave.Click += (s, e) => AddWave();
 
-            bNewSample = new Button { Content = "New Sample" };
+            bNewSample = new Button("New Sample", 0, 0, 100);
             bNewSample.Click += (s, e) => AddSample();
 
-            bRemove = new Button { Content = "Remove" };
+            bRemove = new Button("Remove", 0, 0, 100);
             bRemove.Click += (s, e) => RemoveInstrument();
 
-            bDuplicate = new Button { Content = "Duplicate" };
+            bDuplicate = new Button("Duplicate", 0, 0, 100);
             bDuplicate.Click += (s, e) => DuplicateInstrument();
 
-            bMoveUp = new Button { Content = "Move Up" };
+            bMoveUp = new Button("Move Up", 0, 0, 100);
             bMoveUp.Click += (s, e) => MoveUp();
 
-            bMoveDown = new Button { Content = "Move Down" };
+            bMoveDown = new Button("Move Down", 0, 0, 100);
             bMoveDown.Click += (s, e) => MoveDown();
 
-            bEdit = new Button { Content = "Edit" };
+            bEdit = new Button("Edit", 0, 0, 100);
             bEdit.Click += (s, e) => Edit();
 
-            bRename = new Button { Content = "Rename" };
+            bRename = new Button("Rename", 0, 0, 100);
             bRename.Click += (s, e) => Rename();
 
             scrollbar = new ScrollViewer();
-            this.Content = new StackPanel {
+            this.Content = new StackPanel
+            {
+                Orientation = Orientation.Vertical,
                 Children = {
                     new TextBlock { Text = "Instrument Bank", FontSize = 16, FontWeight = FontWeight.Bold },
-                    new StackPanel {
+                    new StackPanel
+                    {
                         Orientation = Orientation.Horizontal,
                         Children = {
                             bNewWave, bNewSample, bRemove, bDuplicate, bMoveUp, bMoveDown, bEdit, bRename

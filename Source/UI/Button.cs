@@ -1,28 +1,25 @@
 ﻿using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Layout;
 using Avalonia.Media;
-using Microsoft.Xna.Framework;
+using Avalonia.Interactivity;
+
+#nullable enable
 
 namespace WaveTracker.UI
 {
-    public class Button : Clickable
+    public class Button : Avalonia.Controls.Button
     {
-        private Avalonia.Controls.Button avaloniaButton;
-        public string Label { get; private set; }
-        public bool LabelIsCentered { get; set; }
-        private ButtonColors colors;
-        private int labelWidth;
+        public string Label { get; set; }
+        public int x, y, width;
+        public bool LabelIsCentered;
+        public ButtonColors colors;
+        public Avalonia.Controls.Button avaloniaButton;
+        
+        // Boolean flag to track button clicks
+        private bool _clicked;
 
-        public Button()
-        {
-            avaloniaButton = new Avalonia.Controls.Button();
-            avaloniaButton.Click += OnAvaloniaButtonClick;
-        }
-
-        public Button(string label, int x, int y, int width, Element parent)
+        public Button(string label, int x, int y, int width, Element? parent = null)
         {
             Label = label;
             this.x = x;
@@ -32,55 +29,95 @@ namespace WaveTracker.UI
             colors = ButtonColors.Round;
             SetParent(parent);
 
+            // Create the Avalonia button instance
             avaloniaButton = new Avalonia.Controls.Button
             {
-                Content = label
+                Content = label,
+                Width = width
             };
             avaloniaButton.Click += OnAvaloniaButtonClick;
         }
 
         // Event handler for Avalonia Button click
-        private void OnAvaloniaButtonClick(object sender, RoutedEventArgs e)
+        private void OnAvaloniaButtonClick(object? sender, RoutedEventArgs e)
         {
+            _clicked = true; // Set the flag when the button is clicked
             OnClick();
         }
 
-        public event EventHandler<RoutedEventArgs> Click
+        // Clicked property to be used like a boolean check
+        public bool Clicked
+        {
+            get
+            {
+                bool wasClicked = _clicked;
+                _clicked = false; // Reset the flag after returning the value
+                return wasClicked;
+            }
+        }
+
+        public new event EventHandler<RoutedEventArgs> Click
         {
             add => avaloniaButton.Click += value;
             remove => avaloniaButton.Click -= value;
         }
 
-        public object Content
+        public new object Content
         {
             get => avaloniaButton.Content;
             set => avaloniaButton.Content = value;
         }
 
-        // New properties for Width, Height, and Margin
-        public double Width
+        // Properties for Width, Height, and Margin
+        public new double Width
         {
             get => avaloniaButton.Width;
             set => avaloniaButton.Width = value;
         }
 
-        public double Height
+        public new double Height
         {
             get => avaloniaButton.Height;
             set => avaloniaButton.Height = value;
         }
 
-        public Thickness Margin
+        public new Thickness Margin
         {
             get => avaloniaButton.Margin;
             set => avaloniaButton.Margin = value;
+        }
+
+        // New property to enable or disable the button
+        public new bool IsEnabled
+        {
+            get => avaloniaButton.IsEnabled;
+            set => avaloniaButton.IsEnabled = value;
+        }
+
+        // Create the 'enabled' property to map to 'IsEnabled'
+        public bool enabled
+        {
+            get => this.IsEnabled;
+            set => this.IsEnabled = value;
+        }
+
+        // Render method to handle custom rendering
+        public new void Render(DrawingContext context)
+        {
+            // Use Avalonia's rendering system for drawing
+            avaloniaButton.Render(context);
+        }
+        
+        // Implement SetTooltip method
+        public void SetTooltip(string tooltipText)
+        {
+            ToolTip.SetTip(this, tooltipText);
         }
 
         public void SetLabel(string label)
         {
             Label = label;
             avaloniaButton.Content = label;
-            labelWidth = Helpers.GetWidthOfText(label);
         }
 
         public void Draw()

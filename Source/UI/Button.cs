@@ -1,4 +1,4 @@
-﻿using System;  // This is needed for EventHandler
+﻿using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Microsoft.Xna.Framework;
@@ -13,30 +13,32 @@ namespace WaveTracker.UI
         private ButtonColors colors;
         private int labelWidth;
 
+        // Default constructor
         public Button()
         {
-            // Create an internal Avalonia Button
             avaloniaButton = new Avalonia.Controls.Button();
             avaloniaButton.Click += OnAvaloniaButtonClick;
         }
 
-        public Button(string label, int x, int y, Element parent)
+        // Constructor accepting label, x, y, width, and parent
+        public Button(string label, int x, int y, int width, Element parent)
         {
             Label = label;
             this.x = x;
             this.y = y;
+            this.width = width;
             LabelIsCentered = true;
             colors = ButtonColors.Round;
             SetParent(parent);
 
             avaloniaButton = new Avalonia.Controls.Button
             {
-                Content = Label
+                Content = label
             };
             avaloniaButton.Click += OnAvaloniaButtonClick;
         }
 
-        private void OnAvaloniaButtonClick(object sender, RoutedEventArgs e) // Removed nullable annotation
+        private void OnAvaloniaButtonClick(object sender, RoutedEventArgs e)
         {
             // This will handle the Click event in the in-code usage
             OnClick();
@@ -63,8 +65,6 @@ namespace WaveTracker.UI
 
         public void Draw()
         {
-            // Here you can retain your original drawing logic if needed
-            // or integrate Avalonia's rendering engine.
             avaloniaButton.Background = GetBackgroundColor().ToAvaloniaBrush();
             avaloniaButton.BorderBrush = GetBorderColor().ToAvaloniaBrush();
         }

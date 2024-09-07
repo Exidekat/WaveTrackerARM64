@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using Avalonia.Controls;
+using Avalonia.Media;
 
 namespace WaveTracker.UI {
     public class Button : Clickable {
@@ -38,15 +40,15 @@ namespace WaveTracker.UI {
             labelWidth = Helpers.GetWidthOfText(label);
         }
 
-        private Color GetBackgroundColor() {
+        private Microsoft.Xna.Framework.Color GetBackgroundColor() {
             return IsPressed ? colors.backgroundColorPressed : IsHovered ? colors.backgroundColorHover : colors.backgroundColor;
         }
 
-        private Color GetTextColor() {
+        private Microsoft.Xna.Framework.Color GetTextColor() {
             return IsPressed ? colors.textColorPressed : colors.textColor;
         }
 
-        private Color GetBorderColor() {
+        private Microsoft.Xna.Framework.Color GetBorderColor() {
             return IsPressed ? colors.borderColorPressed : colors.borderColor;
         }
 
@@ -72,8 +74,6 @@ namespace WaveTracker.UI {
                     Write(Label, 4, (height + 1) / 2 - 4, colors.textColorDisabled);
                 }
             }
-
         }
-
     }
 }

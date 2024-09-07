@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -136,65 +135,43 @@ namespace WaveTracker {
 
         public App(string[] args) {
             instance = this;
+
             if (args.Length > 0) {
                 inputFilepath = args[0];
             }
 
             graphics = new GraphicsDeviceManager(this);
             graphics.ApplyChanges();
-            Window.Position = new Point(-8, 0);
-            Window.AllowUserResizing = true;
-            Window.AllowAltF4 = true;
-            Content.RootDirectory = "Content";
-            IsMouseVisible = true;
 
-            System.Windows.Forms.Form form = (System.Windows.Forms.Form)System.Windows.Forms.Control.FromHandle(Window.Handle);
-            form.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            form.FormClosing += ClosingForm;
+            // Handle window properties using MonoGame instead of System.Windows.Forms
+            Window.Position = new Point(0, 0); // Start at top left
+            Window.AllowUserResizing = true;  // Enable resizing
+            IsMouseVisible = true;            // Show mouse cursor
+
+            Content.RootDirectory = "Content";
+
             if (!Directory.Exists(SaveLoad.ThemeFolderPath)) {
                 Directory.CreateDirectory(SaveLoad.ThemeFolderPath);
-                File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "Default.wttheme"), ColorTheme.CreateString(ColorTheme.Default));
-                File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "Famitracker.wttheme"), ColorTheme.CreateString(ColorTheme.Famitracker));
-                File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "Fruity.wttheme"), ColorTheme.CreateString(ColorTheme.Fruity));
-                File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "OpenMPT.wttheme"), ColorTheme.CreateString(ColorTheme.OpenMPT));
-                File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "Neon.wttheme"), ColorTheme.CreateString(ColorTheme.Neon));
+                InitializeDefaultThemes();
             }
+
             Input.Intialize();
 
             Settings = SettingsProfile.ReadFromDisk();
             SaveLoad.ReadRecentFiles();
         }
 
-        /// <summary>
-        /// Forces a call of update then draw
-        /// </summary>
-        public static void ForceUpdate() {
-            instance.Tick();
-        }
-
-        private Menu CreateModuleMenu() {
-            return new Menu([
-                new MenuOption("Module Settings", Dialogs.moduleSettings.Open),
-                null,
-                new SubMenu("Cleanup", [
-                        new MenuOption("Remove unused instruments", CurrentModule.RemoveUnusedInstruments),
-                        new MenuOption("Remove unused waves", CurrentModule.RemoveUnusedWaves),
-                    ])
-                ]);
-        }
-        private Menu CreateSongMenu() {
-            return new Menu([
-                new MenuOption("Insert frame", PatternEditor.InsertNewFrame, !VisualizerMode),
-                new MenuOption("Remove frame", PatternEditor.RemoveFrame, !VisualizerMode),
-                new MenuOption("Duplicate frame", PatternEditor.DuplicateFrame, !VisualizerMode),
-                null,
-                new MenuOption("Move frame left", PatternEditor.MoveFrameLeft, !VisualizerMode),
-                new MenuOption("Move frame right", PatternEditor.MoveFrameRight, !VisualizerMode),
-            ]);
+        // Initialize default themes (this function was pulled out of the constructor for clarity)
+        private void InitializeDefaultThemes() {
+            File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "Default.wttheme"), ColorTheme.CreateString(ColorTheme.Default));
+            File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "Famitracker.wttheme"), ColorTheme.CreateString(ColorTheme.Famitracker));
+            File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "Fruity.wttheme"), ColorTheme.CreateString(ColorTheme.Fruity));
+            File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "OpenMPT.wttheme"), ColorTheme.CreateString(ColorTheme.OpenMPT));
+            File.WriteAllText(Path.Combine(SaveLoad.ThemeFolderPath, "Neon.wttheme"), ColorTheme.CreateString(ColorTheme.Neon));
         }
 
         protected override void Initialize() {
-
+            // Existing code to initialize various UI elements...
             CurrentModule = new WTModule();
             WaveBank = new WaveBank(510, 18 + MENUSTRIP_HEIGHT);
             ChannelManager.Initialize(WTModule.MAX_CHANNEL_COUNT);
@@ -210,40 +187,42 @@ namespace WaveTracker {
             ModulePanel = new ModulePanel(2, 18 + MENUSTRIP_HEIGHT);
             AudioEngine.Initialize();
 
-            IsFixedTimeStep = false;
+            IsFixedTimeStep = false;  // Disable fixed time steps
 
+            // Setup MenuStrip
             MenuStrip = new MenuStrip(0, 0, 960, null);
             MenuStrip.AddButton("File", SaveLoad.CreateFileMenu);
             MenuStrip.AddButton("Edit", PatternEditor.CreateEditMenu);
             MenuStrip.AddButton("Song", CreateSongMenu);
             MenuStrip.AddButton("Module", CreateModuleMenu);
             MenuStrip.AddButton("Instrument", InstrumentBank.CreateInstrumentMenu);
-            MenuStrip.AddButton("Tracker", new Menu([
+            MenuStrip.AddButton("Tracker", CreateTrackerMenu());
+
+            base.Initialize();
+        }
+
+        private Menu CreateTrackerMenu() {
+            return new Menu(new List<MenuOption>
+            {
                 new MenuOption("Play", Playback.Play),
                 new MenuOption("Play from beginning", Playback.PlayFromBeginning),
                 new MenuOption("Play from cursor", Playback.PlayFromCursor),
                 new MenuOption("Stop", Playback.Stop),
-                null,
                 new MenuOption("Toggle edit mode", PatternEditor.ToggleEditMode),
-                null,
                 new MenuOption("Toggle channel", ChannelManager.ToggleCurrentChannel),
                 new MenuOption("Solo channel", ChannelManager.SoloCurrentChannel),
-                null,
-                new MenuOption("Reset audio", ResetAudio),
-
-            ]));
-
-            base.Initialize();
-
+                new MenuOption("Reset audio", ResetAudio)
+            });
         }
 
         protected override void LoadContent() {
-
+            // Existing content loading code...
             Graphics.defaultFont = Content.Load<SpriteFont>("custom_font");
             Graphics.highResFonts = new SpriteFont[5];
             for (int i = 0; i < 5; ++i) {
                 Graphics.highResFonts[i] = Content.Load<SpriteFont>("highres_font_" + (i + 1));
             }
+
             Graphics.img = Content.Load<Texture2D>("img");
             Graphics.pixel = new Texture2D(GraphicsDevice, 1, 1);
             Graphics.pixel.SetData(new[] { Color.White });
@@ -432,11 +411,9 @@ namespace WaveTracker {
         /// Closes WaveTracker
         /// </summary>
         public static void ExitApplication() {
-            System.Windows.Forms.Form form = (System.Windows.Forms.Form)System.Windows.Forms.Control.FromHandle(instance.Window.Handle);
-
-            form.Close();
+            instance.Exit(); // MonoGame's built-in exit method
         }
-
+        
         /// <summary>
         /// Called before the app closes
         /// </summary>

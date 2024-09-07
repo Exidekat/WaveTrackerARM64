@@ -1,31 +1,36 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
 
-namespace WaveTracker.Forms {
-    public partial class EnterText : Form {
+namespace WaveTracker.Forms
+{
+    public class EnterText : Window
+    {
+        public string Result { get; private set; }
 
-        public string result;
-        public EnterText() {
-            Application.EnableVisualStyles();
+        public EnterText()
+        {
             InitializeComponent();
+            DataContext = this;
         }
 
-        private void textBox_TextChanged(object sender, EventArgs e) {
-
+        private void InitializeComponent()
+        {
+            AvaloniaXamlLoader.Load(this);
         }
 
-        private void okButton_Click(object sender, EventArgs e) {
-            result = textBox.Text + "";
-            Close();
+        private void OkButton_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            // Get the text from the TextBox
+            Result = this.FindControl<TextBox>("TextBoxInput").Text;
+            this.Close();
         }
 
-        private void cancelButton_Click(object sender, EventArgs e) {
-            result = "\tcanceled";
-            Close();
-        }
-
-        private void tbKeyDown(object sender, KeyEventArgs e) {
-
+        private void CancelButton_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            // Set the result to canceled and close
+            Result = "\tcanceled";
+            this.Close();
         }
     }
 }

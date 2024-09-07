@@ -1,6 +1,9 @@
 ﻿using System;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Microsoft.Xna.Framework;
 
 namespace WaveTracker.UI
@@ -13,14 +16,12 @@ namespace WaveTracker.UI
         private ButtonColors colors;
         private int labelWidth;
 
-        // Default constructor
         public Button()
         {
             avaloniaButton = new Avalonia.Controls.Button();
             avaloniaButton.Click += OnAvaloniaButtonClick;
         }
 
-        // Constructor accepting label, x, y, width, and parent
         public Button(string label, int x, int y, int width, Element parent)
         {
             Label = label;
@@ -38,9 +39,9 @@ namespace WaveTracker.UI
             avaloniaButton.Click += OnAvaloniaButtonClick;
         }
 
+        // Event handler for Avalonia Button click
         private void OnAvaloniaButtonClick(object sender, RoutedEventArgs e)
         {
-            // This will handle the Click event in the in-code usage
             OnClick();
         }
 
@@ -50,17 +51,36 @@ namespace WaveTracker.UI
             remove => avaloniaButton.Click -= value;
         }
 
+        public object Content
+        {
+            get => avaloniaButton.Content;
+            set => avaloniaButton.Content = value;
+        }
+
+        // New properties for Width, Height, and Margin
+        public double Width
+        {
+            get => avaloniaButton.Width;
+            set => avaloniaButton.Width = value;
+        }
+
+        public double Height
+        {
+            get => avaloniaButton.Height;
+            set => avaloniaButton.Height = value;
+        }
+
+        public Thickness Margin
+        {
+            get => avaloniaButton.Margin;
+            set => avaloniaButton.Margin = value;
+        }
+
         public void SetLabel(string label)
         {
             Label = label;
             avaloniaButton.Content = label;
             labelWidth = Helpers.GetWidthOfText(label);
-        }
-
-        public object Content
-        {
-            get => avaloniaButton.Content;
-            set => avaloniaButton.Content = value;
         }
 
         public void Draw()
@@ -69,12 +89,12 @@ namespace WaveTracker.UI
             avaloniaButton.BorderBrush = GetBorderColor().ToAvaloniaBrush();
         }
 
-        private Color GetBackgroundColor()
+        private Microsoft.Xna.Framework.Color GetBackgroundColor()
         {
             return IsPressed ? colors.backgroundColorPressed : IsHovered ? colors.backgroundColorHover : colors.backgroundColor;
         }
 
-        private Color GetBorderColor()
+        private Microsoft.Xna.Framework.Color GetBorderColor()
         {
             return IsPressed ? colors.borderColorPressed : colors.borderColor;
         }
@@ -82,10 +102,9 @@ namespace WaveTracker.UI
 
     public static class ColorExtensions
     {
-        // Convert XNA Color to Avalonia Brush
-        public static Avalonia.Media.IBrush ToAvaloniaBrush(this Microsoft.Xna.Framework.Color color)
+        public static IBrush ToAvaloniaBrush(this Microsoft.Xna.Framework.Color color)
         {
-            return new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(color.A, color.R, color.G, color.B));
+            return new SolidColorBrush(Avalonia.Media.Color.FromArgb(color.A, color.R, color.G, color.B));
         }
     }
 }
